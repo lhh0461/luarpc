@@ -1,0 +1,22 @@
+<root>
+    <server>
+        <function>Ping</function>
+        <path>scripts.hello</path>
+        <args>
+            <arg>RPC_INT</arg>
+            <arg>RPC_BOOL</arg>
+            <arg>RPC_BYTES</arg>
+            <arg>RPC_STRING</arg>
+            <arg>RPC_FLOAT</arg>
+        </args>
+    </server>
+    <client>
+        <function>Pong</function>
+        <args>
+            <!-- 操作ID -->
+            <arg>RPC_INT</arg>
+            <arg>RPC_PB</arg>
+            <arg>RPC_STRING</arg>
+        </args>
+    </client>
+</root>
