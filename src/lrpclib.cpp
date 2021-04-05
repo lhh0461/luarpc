@@ -1,27 +1,24 @@
-#include "lua.h"
-#include "lauxlib.h"
+#include "lua.hpp"
+#include "CRpc.h"
 
+static int l_rpccall (lua_State *L)
+{
+    int session = luaL_checkinteger(L, 1);
+    int funcid = luaL_checkinteger(L, 2);
 
+    int argnum = lua_gettop(L);
 
-static const luaL_Reg rpclib[] = {
-  {"abs",   math_abs},
-  {"acos",  math_acos},
-  {"asin",  math_asin},
-  {"atan",  math_atan},
-  {"ceil",  math_ceil},
-  {"cos",   math_cos},
-  {"deg",   math_deg},
-  {"exp",   math_exp},
-  {"tointeger", math_toint},
+    return 1;
+}
+
+static const luaL_Reg crpclib[] = 
+{
+  {"call", l_rpccall},
   {NULL, NULL}
 };
 
-
-/*
-** Open math library
-*/
-LUAMOD_API int luaopen_rpc (lua_State *L) {
-  luaL_newlib(L, rpclib);
-  return 1;
+LUAMOD_API int luaopen_crpc (lua_State *L) {
+    luaL_newlib(L, crpclib);
+    return 1;
 }
 

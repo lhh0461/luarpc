@@ -1,22 +1,20 @@
 <root>
-    <server>
+    <rpc>
         <function>Ping</function>
-        <path>scripts.hello</path>
+        <file>hello</file>
         <args>
-            <arg>RPC_INT</arg>
-            <arg>RPC_BOOL</arg>
-            <arg>RPC_BYTES</arg>
-            <arg>RPC_STRING</arg>
-            <arg>RPC_FLOAT</arg>
+            <arg name="subid" type="RPC_INT"/>
+            <arg name="is_new" type="RPC_BOOL"/>
+            <arg name="pb_info" type="RPC_BYTES"/>
+            <arg name="name" type="RPC_STRING"/>
+            <arg name="grade" type="RPC_FLOAT"/>
         </args>
-    </server>
-    <client>
-        <function>Pong</function>
-        <args>
-            <!-- 操作ID -->
-            <arg>RPC_INT</arg>
-            <arg>RPC_PB</arg>
-            <arg>RPC_STRING</arg>
-        </args>
-    </client>
+        <res>
+            <arg name="subid" type="RPC_INT"/>
+            <arg name="is_new" type="RPC_BOOL"/>
+            <arg name="pb_info" type="RPC_BYTES"/>
+            <arg name="name" type="RPC_STRING"/>
+            <arg name="grade" type="RPC_FLOAT"/>
+        </res>
+    </rpc>
 </root>

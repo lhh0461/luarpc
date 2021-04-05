@@ -1,0 +1,16 @@
+<root>
+    <rpc>
+        <function>MoveReq</function>
+        <file>C_IMPLEMENT</file>
+        <args>
+            <arg name="subid" type="RPC_INT"/>
+            <arg name="is_new" type="RPC_BOOL"/>
+            <arg name="grade" type="RPC_FLOAT"/>
+        </args>
+        <res>
+            <arg>RPC_INT</arg>
+            <arg>RPC_BYTES</arg>
+            <arg>RPC_STRING</arg>
+        </res>
+    </rpc>
+</root>
