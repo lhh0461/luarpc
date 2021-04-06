@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import json
-import codecs
 import os
+import sys
+import xml.etree.ElementTree as ET
 
 struct_id2name = {}
 struct_name2id = {}
@@ -110,17 +110,18 @@ def parse_module(module_data):
         for name,struct_data in struct_list.items():
             parse_struct(name, struct_data)
 
-def parse():
+def parse_one_file(xml_file):
+    tree = ET.ElementTree(file = xml_file)
+    root = tree.getroot()
+    for child in root:
+        print(child.tag,child.attrib)
+        
+    
+def parse_all_file():
     files = os.listdir("desc")
     for f in files:
         if os.path.splitext(f)[-1] == ".xml":
-            with open("rpc/" + f, 'r') as f:
-                rpcdata = json.load(f)
-                if "MODULE_LIST" in rpcdata:
-                    module_list = rpcdata["MODULE_LIST"]
-                    for module_data in module_list:
-                        parse_module(module_data)
-
+            parse_one_file(f)
 
 def sort_struct():
     global struct_id2name
@@ -188,11 +189,13 @@ def write_file():
 
                 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        print "pls input path"
+        exit(1)
 
-    parse()
-    sort_struct()
-    sort_function()
-    #check_struct()
+    parse_all_file(sys.argv[1])
+    gen_meta_cfg()
+    gen_lua_stub()
     write_file()
     print"parse rpc ok"
 

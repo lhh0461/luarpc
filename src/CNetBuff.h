@@ -28,10 +28,10 @@ public:
     const char *PopBytes(size_t &len);
 public:
     int GetErrorNo() { return m_iErrorCode; }
+    int GetRemainSize() { return m_iWritePtr < m_iReadPtr ? m_iWritePtr + MAX_NETBUF_SIZE - m_iReadPtr : m_iWritePtr - m_iReadPtr; }
 private:
-    char *m_pCurPtr;
-    size_t m_iSize; //buff size
-    size_t m_iOffset; //read data offset
+    char *m_iWritePtr;
+    char *m_iReadPtr;
     int m_iErrorCode;
     char m_Buff[MAX_NETBUF_SIZE];
 };

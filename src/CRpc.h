@@ -15,6 +15,8 @@ public:
     int RpcCall(int iSessionId, int iFuncId);
     int RpcDisptach(CNetBuff *pBuff);
     CRpcMeta const* GetMetaInfo();
+    CNetBuff *GetNetBuff();
+    static CRpc* GetInstance();
 private:
     lua_State *m_luaState;
     CRpcMeta m_MetaInfo;

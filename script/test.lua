@@ -1,7 +1,10 @@
 local hello_rpc = require "hello_rpc"
 
-local iv = 10
-local cv = "abc"
-local tv = {1:2,"a":1}
-local res = hello_rpc:Ping(mailbox, iv, cv, tc)
+local submsg = 111
+local is_new = false
+local pb = "xxxx"
+local name = "test"
+local grade = 10
+
+local res = hello_rpc:Ping(0, submsg, is_new, pb, name, grade)
 print(res)

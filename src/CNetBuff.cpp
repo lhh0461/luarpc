@@ -6,7 +6,7 @@
 
 CNetBuff::CNetBuff()
 {
-
+    Reset();
 }
 
 CNetBuff::~CNetBuff()
@@ -16,73 +16,76 @@ CNetBuff::~CNetBuff()
 
 void CNetBuff::Reset()
 {
-    m_iSize = 0;
-    m_iOffset = 0;
     m_iErrorCode = 0;
-    m_pCurPtr = m_Buff;
+    m_iWritePtr = m_Buff;
+    m_iReadPtr = m_Buff;
 }
 
 void CNetBuff::PushShort(short siValue)
 {
-    *((short *)m_pCurPtr) = siValue;
-    m_pCurPtr += sizeof(short);
+    *((short *)m_iWritePtr) = siValue;
+    m_iWritePtr += sizeof(short);
 }
 
 void CNetBuff::PushInt(int iValue)
 {
-    *((int *)m_pCurPtr) = iValue;
-    m_pCurPtr += sizeof(int);
+    *((int *)m_iWritePtr) = iValue;
+    m_iWritePtr += sizeof(int);
 }
 
 void CNetBuff::PushLong(long long llValue)
 {
-    *((long long *)m_pCurPtr) = llValue;
-    m_pCurPtr += sizeof(long long);
+    *((long long *)m_iWritePtr) = llValue;
+    m_iWritePtr += sizeof(long long);
 }
 
 void CNetBuff::PushString(const char* ptr, size_t len)
 {
     PushInt(len);
-    std::memcpy(m_pCurPtr, ptr, len);
-    m_pCurPtr += len;
+    std::memcpy(m_iWritePtr, ptr, len);
+    m_iWritePtr += len;
 }
 
 void CNetBuff::PushFloat(float fValue)
 {
-    *((float *)m_pCurPtr) = fValue;
-    m_pCurPtr += sizeof(float);
+    *((float *)m_iWritePtr) = fValue;
+    m_iWritePtr += sizeof(float);
 }
 
 void CNetBuff::PushBytes(const char* ptr, size_t len)
 {
     PushInt(len);
-    std::memcpy(m_pCurPtr, ptr, len);
-    m_pCurPtr += len;
+    std::memcpy(m_iWritePtr, ptr, len);
+    m_iWritePtr += len;
 }
 
 
 int CNetBuff::PopInt()
 {
-    int iValue = *((int *)m_pCurPtr);
-    m_pCurPtr += sizeof(int);
+    int iValue = *((int *)m_iReadPtr);
+    m_iReadPtr += sizeof(int);
     return iValue;
 }
 
 const char *CNetBuff::PopString(size_t &len)
 {
     len = PopInt();
-    return m_pCurPtr;
+    char *ptr = m_iReadPtr;
+    m_iReadPtr += len;
+    return ptr;
 }
 
 float CNetBuff::PopFloat()
 {
-    float iValue = *((float *)m_pCurPtr);
-    m_pCurPtr += sizeof(float);
+    float iValue = *((float *)m_iReadPtr);
+    m_iReadPtr += sizeof(float);
     return iValue;
 }
 
 const char *CNetBuff::PopBytes(size_t &len)
 {
     len = PopInt();
-    return m_pCurPtr;
+    char *ptr = m_iReadPtr;
+    m_iReadPtr += len;
+    return ptr;
 }

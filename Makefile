@@ -1,12 +1,11 @@
 PROJECT=server
-CC=g++
-CFLAGS=-W -g
 
 CXX=g++
-CXXFLAGS=-W -std=c++11 -g
+CXXFLAGS=-W -std=c++11 -g -ldl
 
 SRC_DIR:=src
 INC_DIR:=include
+LUA_CLIB_DIR:=luaclib
 THIRD_PART_DIR:=3rd
 PROTO_DIR:=$(THIRD_PART_DIR)/protobuf
 LUA_DIR:=$(THIRD_PART_DIR)/lua-5.3.5/install
@@ -22,15 +21,15 @@ LIBS=-L$(LUA_DIR)/lib
 
 STATIC_LIBS= -llua 
 
-all:$(CXX_OBJ_FILES)
-	$(CC) $(CFLAGS) $(CXX_OBJ_FILES) -o $(PROJECT) $(LIBS) $(STATIC_LIBS)
+all:$(CXX_OBJ_FILES) $(LUA_LIB)
+	$(CXX) $(CXXFLAGS) $(CXX_OBJ_FILES) -o $(PROJECT) $(LIBS) $(STATIC_LIBS)
 
 $(SRC_DIR)/%.o:$(SRC_DIR)/%.cpp
-	$(CXX) $(CXXFLAGS) $< -c -o $@ $(INC_FILES) $(LIBS) 
+	$(CXX) $(CXXFLAGS) $< -c -o $@ $(INC_FILES) $(LIBS)
 
 .PHONY:clean rpc
 clean:
-	-rm $(PROJECT)
+	-rm -f $(PROJECT)
 	-rm -rf $(SRC_DIR)/*.o
 rpc:
 	@python tools/parse_rpc.py
