@@ -10,14 +10,23 @@ int main()
 {
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
-    luaL_dostring(L, "package.path = package.path .. \";script/?.lua;gen_code/?.lua\"");
+    int ret = luaL_dostring(L, "package.path = package.path .. \";script/?.lua;gen_code/?.lua\"");
+    if (ret != LUA_OK){
+        LOG_ERROR("Error: %s", lua_tostring(L,-1));
+        return -1;
+    }
 
     SetLogFileName("./log");
-    g_pRpc = new CRpc()
-    pRpc->Init(L, "./tools/meta.cfg");
+    g_pRpc = new CRpc();
+    g_pRpc->Init(L, "./gen_code/meta.cfg");
 
-    luaL_dofile(L, "test.lua");
-    pRpc->RpcDisptach(pRpc->GetNetBuff());
+    ret = luaL_dofile(L, "test.lua");
+    if (ret != LUA_OK){
+        LOG_ERROR("%s", lua_tostring(L,-1));
+        return -1;
+    }
+    std::cout << "rpc call finish1." <<std::endl;
+    g_pRpc->RpcDisptach(g_pRpc->GetNetBuff());
     std::cout << "rpc call finish." <<std::endl;
     return 0;
 }
