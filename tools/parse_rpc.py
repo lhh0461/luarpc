@@ -3,137 +3,49 @@
 
 import os
 import sys
+import codecs
 import xml.etree.ElementTree as ET
-
-struct_id2name = {}
-struct_name2id = {}
 
 function_id2key = {}
 function_key2id = {}
 
-all_struct_list = {}
-all_function_list = {}
-
 field2id = {
-    "int":1,
-    "string":2,
-    "struct":3,
-    "float":4,
+    "RPC_INT":1,
+    "RPC_STRING":2,
+    "RPC_FLOAT":3,
+    "RPC_BYTES":4,
+    "RPC_BOOL":5,
 }
 
-def parse_struct(struct_name, struct_data):
-    if struct_name in all_struct_list:
-        raise Exception("repeated struct name is unsupported, ", struct_name)
-
-    if not isinstance(struct_data, list):
-        raise Exception("struct data must be list", struct_name)
-
-    field_list = []
-    for field_data in struct_data: 
-        if not isinstance(field_data, dict):
-            raise Exception("field data must be dict", field_data)
-
-        if "TYPE" not in field_data:
-            raise Exception("field data must set type", field_data)
-
-        if field_data["TYPE"] == "struct" and "STRUCT" not in field_data:
-            raise Exception("field data must set type", field_data)
-
-        data = {}
-        data["name"] = field_data["NAME"]
-        data["type"] = field2id[field_data["TYPE"]]
-        data["array"] = field_data["ARRAY"]
-        data["struct"] = field_data.get("STRUCT", 0)
-
-        if "DEFAULT" in field_data:
-            data["default"] = field_data["DEFAULT"]
-        field_list.append(data)
-
-    all_struct_list[struct_name] = field_list
-    
-def parse_args(arg_data):
-    ret = {}
-    if "STRUCT" in arg_data:
-        ret["struct"] = arg_data["STRUCT"]
-    else:
-        ret["struct"] = 0
-        if arg_data["TYPE"] == "STRUCT":
-            raise Exception("struct arg must set \"STRUCT\" field")
-
-    ret["type"] = field2id[arg_data["TYPE"]]
-    ret["array"] = arg_data["ARRAY"]
-    return ret
-
-def parse_function(module_path, function_data):
-    if "FUNCTION_NAME" in function_data:
-        function_name = function_data["FUNCTION_NAME"]
-
-        arg_info = []
-        if "ARG_LIST" in function_data:
-            arg_list = function_data["ARG_LIST"]
-            for arg_data in arg_list:
-                arg_info.append(parse_args(arg_data))
-
-        c_imp = function_data["C_IMP"]
-        deamon = function_data["DEAMON"]
-        description = function_data.get("DESCRIPTION", "")
-        function_key = module_path + ":" + function_name
-        all_function_list[function_key] = {
-            "module":module_path,
-            "function":function_name,
-            "c_imp" :c_imp,
-            "deamon" :deamon,
-            "arg_list" :arg_info,
-            "name" :function_name,
-            "description" :description,
-        }
-
-    else:
-        raise Exception("must define function name")
-
-def parse_module(module_data):
-    module_path = ""
-    if "MODULE_PATH" in module_data:
-       module_path = module_data["MODULE_PATH"]
-    else:
-        raise Exception("must define module path")
-
-    if "FUNCTION_LIST" in module_data:
-        function_list = module_data["FUNCTION_LIST"]
-        for function_data in function_list:
-            parse_function(module_path, function_data)
-    else:
-        raise Exception("must define function list")
-
-    if "STRUCT_LIST" in module_data:
-        struct_list = module_data["STRUCT_LIST"]
-        for name,struct_data in struct_list.items():
-            parse_struct(name, struct_data)
+all_function_list = {}
 
 def parse_one_file(xml_file):
     tree = ET.ElementTree(file = xml_file)
     root = tree.getroot()
-    for child in root:
-        print(child.tag,child.attrib)
-        
-    
-def parse_all_file():
-    files = os.listdir("desc")
+    for func in root:
+        func_info = {}
+        for child in func:
+            #print(child.tag,child.attrib, child.text)
+            if child.tag == "function":
+                func_info["name"] = child.text
+            elif child.tag == "file":
+                func_info["file"] = child.text
+            elif child.tag == "args":
+                func_info["arg_list"] = []
+                for arg in child:
+                    func_info["arg_list"] += [{"type":field2id[arg.attrib["type"]], "name":arg.attrib["name"]}]
+            elif child.tag == "res":
+                func_info["res_list"] = []
+                for arg in child:
+                    func_info["res_list"] += [{"type":field2id[arg.attrib["type"]], "name":arg.attrib["name"]}]
+        all_function_list[func_info["file"] + ":" + func_info["name"]] = func_info
+            
+def parse_all_file(path):
+    files = os.listdir(path)
     for f in files:
         if os.path.splitext(f)[-1] == ".xml":
-            parse_one_file(f)
+            parse_one_file(path + "/"+ f)
 
-def sort_struct():
-    global struct_id2name
-    global struct_name2id
-    struct_id = 1
-    sorted_list = all_struct_list.keys()
-    sorted_list.sort()
-    for struct_name in sorted_list:
-        struct_id2name[struct_id] = struct_name
-        struct_name2id[struct_name] = struct_id
-        struct_id += 1
-         
 def sort_function():
     global function_key2id
     global function_id2key
@@ -149,42 +61,32 @@ def write_file():
     global struct_id2name
     global struct_name2id
     global function_id2key
-    with open("rpc/rpc.cfg", 'w') as f:
-        f.write('struct_table_num:{num}\n'.format(num=len(all_struct_list))) 
-        sorted_id_list = struct_id2name.keys()
-        for struct_id in sorted_id_list:
-            struct_name = struct_id2name[struct_id]
-            struct_data = all_struct_list[struct_name]
-            f.write('struct_id:{struct_id},field_num:{field_num},struct_name={struct_name}\n'.
-                    format(struct_id=struct_id, field_num=len(struct_data), struct_name=struct_name)) 
-            for field_data in struct_data:
-                struct_id = struct_name2id.get(field_data["struct"],0) 
-                f.write('field_type:{field_type},struct_id:{struct_id},array:{array},field_name={field_name}\n'.
-                    format(field_type=field_data["type"], struct_id=struct_id, array=field_data["array"], field_name=field_data["name"])) 
-            
+    with open("../gen_code/meta.cfg", 'w') as f:
         f.write('function_table_num:{num}\n'.format(num=len(all_function_list))) 
         sorted_id_list = function_id2key.keys()
         for function_id in sorted_id_list:
             function_key = function_id2key[function_id]
             function_data = all_function_list[function_key]
-            f.write('function_id:{function_id},arg_num:{arg_num},module={module},function={function},c_imp={c_imp},deamon={deamon}\n'.
-                    format(function_id=function_id,arg_num=len(function_data["arg_list"]),module=function_data["module"],function=function_data["function"],
-                        c_imp=function_data["c_imp"],deamon=function_data["deamon"])) 
+            f.write('function_id:{function_id},arg_num:{arg_num},res_num:{res_num},path={path},function={function}\n'.
+                    format(function_id=function_id,arg_num=len(function_data["arg_list"]),res_num=len(function_data["res_list"]), 
+                    path=function_data["file"],function=function_data["name"])) 
             for arg_data in function_data["arg_list"]:
-                struct_id = struct_name2id.get(arg_data["struct"],0) 
-                f.write('arg_type:{arg_type},struct_id:{struct_id},array:{array}\n'.
-                    format(arg_type=arg_data["type"], struct_id=struct_id, array=arg_data["array"]))
+                f.write('arg_type:{arg_type},arg_name:{arg_name}\n'.
+                    format(arg_type=arg_data["type"], arg_name=arg_data["name"]))
+            for arg_data in function_data["res_list"]:
+                f.write('res_type:{res_type},arg_name:{arg_name}\n'.
+                    format(res_type=arg_data["type"], arg_name=arg_data["name"]))
 
-    with codecs.open("script/rpc_id.py", "w", "utf-8") as f:
-        print >>f, u'# -*- coding: utf-8 -*-'
-        print >>f, u'# 此文件由脚本生成，请勿修改！'
-        print >>f, u''
-        print >>f, u'# 以下是协议ID'
+    with codecs.open("../gen_code/func_id.lua", "w", "utf-8") as f:
+        print >>f, u'--Don\'t Edit It! Auto Generate By Tools\n'
+        print >>f, u'local func_tbl = {'
         sorted_id_list = function_id2key.keys()
         for function_id in sorted_id_list:
             function_key = function_id2key[function_id]
             function_data = all_function_list[function_key]
-            print >>f , u'{function_name} = {function_id} #{description}'.format(function_name=function_data["function"].upper(), function_id=function_id, description=function_data["description"])
+            print >>f , u'\tFUNC_ID_{file_name}_{function_name} = {function_id},'.format(file_name=function_data["file"].upper(),
+            function_name=function_data["name"].upper(), function_id=function_id)
+        print >>f, u'}\n\nreturn func_tbl'
             
 
                 
@@ -194,8 +96,9 @@ if __name__ == '__main__':
         exit(1)
 
     parse_all_file(sys.argv[1])
-    gen_meta_cfg()
-    gen_lua_stub()
+    sort_function()
+    #gen_meta_cfg()
+    #gen_lua_stub()
     write_file()
     print"parse rpc ok"
 

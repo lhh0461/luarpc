@@ -20,7 +20,7 @@ int main()
     g_pRpc = new CRpc();
     g_pRpc->Init(L, "./gen_code/meta.cfg");
 
-    ret = luaL_dofile(L, "test.lua");
+    ret = luaL_dofile(L, "script/test.lua");
     if (ret != LUA_OK){
         LOG_ERROR("%s", lua_tostring(L,-1));
         return -1;

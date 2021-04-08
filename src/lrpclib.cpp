@@ -7,7 +7,7 @@ static int l_rpccall (lua_State *L)
     int funcid = luaL_checkinteger(L, 2);
 
     int argnum = lua_gettop(L);
-    //g_rpc->
+    g_rpc->RpcCall(session, funcid);
     return 1;
 }
 

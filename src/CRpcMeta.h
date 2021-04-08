@@ -14,6 +14,7 @@ enum FieldType {
     RPC_STRING = 2,
     RPC_FLOAT = 3,
     RPC_BYTES = 4,
+    RPC_BOOL = 5,
 };
 
 struct stField

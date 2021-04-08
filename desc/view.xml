@@ -8,9 +8,9 @@
             <arg name="grade" type="RPC_FLOAT"/>
         </args>
         <res>
-            <arg>RPC_INT</arg>
-            <arg>RPC_BYTES</arg>
-            <arg>RPC_STRING</arg>
+            <arg name="subid" type="RPC_INT"/>
+            <arg name="is_new" type="RPC_BOOL"/>
+            <arg name="pb_info" type="RPC_BYTES"/>
         </res>
     </rpc>
 </root>
