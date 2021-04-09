@@ -1,5 +1,5 @@
 --Don't Edit It! Auto Generate By Tools
-local rpc = require "rpc"
+local rpc = require "librpc"
 local func_id = require "func_id"
 
 local hello_rpc = {}

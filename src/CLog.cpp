@@ -11,7 +11,7 @@
 
 #define MAX_TIME_STR_LEN  30
 #define MAX_LOG_FILE_NAME 128 
-#define MAX_LOG_BUF_LEN   256
+#define MAX_LOG_BUF_LEN   10240
 
 static char g_strLogBuf[MAX_LOG_BUF_LEN];
 static LOG_LEVEL g_eLogSwitch = LOG_DEBUG;

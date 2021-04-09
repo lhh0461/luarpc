@@ -4,6 +4,9 @@
 #include "CRpcForLua.h"
 #include "CLog.h"
 
+CRpc *g_pRpc = NULL;
+
+
 CRpc::CRpc()
 {
     
@@ -78,9 +81,13 @@ int CRpc::RpcDisptach(CNetBuff *pBuff)
     }
     //把_LOADED表放到栈顶
     lua_getfield(m_luaState, LUA_REGISTRYINDEX, LUA_LOADED_TABLE);
+
     //把函数放到栈顶，协议是模块必须要返回一个表格
+    lua_getfield(m_luaState, -1, pFunc->strFuncModule.c_str());  /* LOADED[name] */
     lua_getfield(m_luaState, -1, pFunc->strFuncName.c_str());  /* LOADED[name] */
+    lua_pushvalue(m_luaState, -2);
     int top2 = lua_gettop(m_luaState);
+ 
     LOG_DEBUG("top2=%d", top2);
     
     if (UnPackForLua(m_luaState, pFunc, pBuff) == -1)
@@ -88,10 +95,12 @@ int CRpc::RpcDisptach(CNetBuff *pBuff)
         LOG_ERROR("unpack error");
         return -1;
     }
+    int top3 = lua_gettop(m_luaState);
+    LOG_DEBUG("top3=%d", top3);
+    //调用模块函数
+    //此时参数已经在栈上
     lua_pcall(m_luaState, pFunc->argList.size(), 0, 0);
 
-    //此时参数已经在栈上
-    //TODO 调用模块函数
     return 0;
 }
 

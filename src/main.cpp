@@ -4,13 +4,16 @@
 #include "CLog.h"
 #include <iostream>
 
-CRpc *g_pRpc = NULL;
-
 int main()
 {
     lua_State *L = luaL_newstate();
     luaL_openlibs(L);
     int ret = luaL_dostring(L, "package.path = package.path .. \";script/?.lua;gen_code/?.lua\"");
+    if (ret != LUA_OK){
+        LOG_ERROR("Error: %s", lua_tostring(L,-1));
+        return -1;
+    }
+    ret = luaL_dostring(L, "package.cpath = package.cpath .. \";./?.so\"");
     if (ret != LUA_OK){
         LOG_ERROR("Error: %s", lua_tostring(L,-1));
         return -1;

@@ -1,5 +1,8 @@
 PROJECT=luarpc
 
+CC=gcc
+CCFLAGS=-W -std=c++11 -g -ldl
+
 CXX=g++
 CXXFLAGS=-W -std=c++11 -g -ldl
 
@@ -21,18 +24,21 @@ CXX_OBJ_FILES:=$(subst .cpp,.o,$(CXX_SRC_FILES))
 CXX_SRC_FILES:=$(foreach v, $(SRC_DIR), $(wildcard $(v)/*.cpp))
 CXX_OBJ_FILES:=$(subst .cpp,.o,$(CXX_SRC_FILES))
 
-LIBS=-L$(LUA_DIR)/lib
+LIBS=-L$(LUA_DIR)/lib \
+	-L./
 
-STATIC_LIBS= -llua 
+STATIC_LIBS= -llua  \
+	-lrpc
 
-all:$(CXX_OBJ_FILES)
+all:$(CXX_OBJ_FILES) 
+	$(CXX) $(LUAC_LIB_DIR)/lrpclib.cpp -fPIC -shared -o librpc.so $(INC_FILES)
 	$(CXX) $(CXXFLAGS) $(CXX_OBJ_FILES) -o $(PROJECT) $(LIBS) $(STATIC_LIBS)
 
 $(SRC_DIR)/%.o:$(SRC_DIR)/%.cpp
 	$(CXX) $(CXXFLAGS) $< -c -o $@ $(INC_FILES) $(LIBS)
 
 #$(LUAC_LIB_DIR)/rpc.so:
-#	$(CXX) $(LUAC_LIB_DIR)/lrpclib.cpp -fPIC -shared -o rpc.so $(INC_FILES)
+#	$(CXX) $(LUAC_LIB_DIR)/lrpclib.cpp -fPIC -shared -o rpc.so $(INC_FILES) 
 
 .PHONY:clean rpc
 clean:

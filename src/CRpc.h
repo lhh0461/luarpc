@@ -23,4 +23,6 @@ private:
     CNetBuff m_Buff;
 };
 
+extern CRpc *g_pRpc;
+
 #endif
