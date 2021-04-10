@@ -5,7 +5,6 @@ local func_id = require "func_id"
 local hello_rpc = {}
 
 function hello_rpc:Ping(session, subid,is_new,pb_info,name,grade)
-    print "enter hello rpc"
     rpc.call(session, func_id.FUNC_ID_HELLO_PING, subid,is_new,pb_info,name,grade)
 end
 

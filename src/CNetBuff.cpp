@@ -1,5 +1,6 @@
 #include <cstddef>
 #include <cstring>
+#include <arpa/inet.h>
 
 #include "CNetBuff.h"
 
