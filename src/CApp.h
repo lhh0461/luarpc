@@ -13,5 +13,6 @@ protected:
 private:
     lua_State *L;
     CRpc m_Rpc;
-    //CConnection 
+    CConnectionMgr m_ConnMgr;
+    CEventLoop m_EventLoop;
 };
