@@ -1,19 +1,21 @@
 #pragma once
 #include "Portable.h"
 
-#if defined(HAVE_EPOLL)
+#if defined(HAVE_KQUEUE)
+
+#include <sys/types.h>
+#include <sys/event.h>
 
 #include "IPoller.h"
 
-class CEpollPoller : public IPoller
+class CKqueuePoller : public IPoller
 {
 public:
     int AddEvent(int id, int mask);
     int DelEvent(int id, int mask);
     int Poll();
 private:
-    int efd;
-    struct epoll_event *events;
+    int kqfd;
+    struct kevent *events;
 };
-
 #endif

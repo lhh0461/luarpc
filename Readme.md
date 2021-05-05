@@ -7,5 +7,15 @@
 
 3、怎么实现协程
 
+<<<<<<< Updated upstream
 4、在so里怎么访问app里的rpc接口
+=======
+
+4、在so里怎么访问app里的rpc数据
+现在问题是so里的rpc实例还没初始化
+
+5、连接管理实现
+
+6、缓冲区实现
+>>>>>>> Stashed changes
 

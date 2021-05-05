@@ -11,7 +11,10 @@ int CApp::Start()
     }
 
     //TODO 初始化线程
+    InitThread();
+
     //TODO 初始化网络
+    InitRpc();
 
     SetLogFileName("./log");
 

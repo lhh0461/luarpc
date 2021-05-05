@@ -1,5 +1,6 @@
 #include "lua.hpp"
 #include "CRpc.h"
+#include "CEventLoop.h"
 
 class CApp
 {
@@ -10,6 +11,8 @@ public:
     virtual void OnDestroy() = 0; //业务析构
 protected:
     int InitLua();
+    int InitThread();
+    int InitRpc();
 private:
     lua_State *L;
     CRpc m_Rpc;

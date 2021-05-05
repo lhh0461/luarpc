@@ -1,9 +1,16 @@
-#include "CEpollPoller.h"
 
+#include "CEpollPoller.h"
+#if defined(HAVE_EPOLL)
+
+#include <sys/epoll.h>
+
+CEpollPoller::CEpollPoller()
+{
+    this->efd = epoll_create(1024);
+}
 
 int CEpollPoller::AddEvent(int fd, int mask)
 {
-    aeApiState *state = eventLoop->apidata;
     struct epoll_event ee = {0}; /* avoid valgrind warning */
     /* If the fd was already monitored for some event, we need a MOD
      *      * operation. Otherwise we need an ADD operation. */
@@ -16,13 +23,12 @@ int CEpollPoller::AddEvent(int fd, int mask)
     if (mask & AE_WRITABLE) ee.events |= EPOLLOUT;
     ee.data.fd = fd;
 
-    if (epoll_ctl(state->epfd,op,fd,&ee) == -1) return -1;
+    if (epoll_ctl(efd,op,fd,&ee) == -1) return -1;
     return 0;
 }
 
 int CEpollPoller::DelEvent(int fd, int delmask)
 {
-    aeApiState *state = eventLoop->apidata;
     struct epoll_event ee = {0}; /* avoid valgrind warning */
     int mask = eventLoop->events[fd].mask & (~delmask);
 
@@ -39,6 +45,9 @@ int CEpollPoller::DelEvent(int fd, int delmask)
     }
 }
 
-int CEpollPoller::Poll(int millsecond) {
+int CEpollPoller::Poll(int millsecond,  std::function<void(int)>eventcb) {
     epoll_wait(epoll_fd_, events_, max_events_ + 1, millsecond);
 }
+
+
+#endif
